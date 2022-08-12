@@ -8,10 +8,9 @@ class PhotoAlbum
 
   def request_photos(album_id = nil)
     res = Net::HTTP.get_response(uri(album_id))
-    if res.is_a?(Net::HTTPSuccess)
-      return parse_body(res.body).map { |photo| "[#{photo['id']}] #{photo['title']}" }
-    end
-    "Request failed with #{res.code} #{res.message}"
+    raise "Request failed with #{res.code} #{res.message}" unless res.is_a?(Net::HTTPSuccess)
+
+    parse_body(res.body).map { |photo| "[#{photo['id']}] #{photo['title']}" }
   end
 
   def uri(album_id = nil)

@@ -15,10 +15,12 @@ describe PhotoAlbum do
   end
 
   describe 'request_photos' do
-    let(:response) { instance_double(Net::HTTPOK, code: 200, message: 'OK') }
+    let(:response) { Net::HTTPSuccess.new('1.1', 200, 'OK') }
+    let(:parsed_body) { [] }
 
     before do
       allow(Net::HTTP).to receive(:get_response) { response }
+      allow(response).to receive(:body) { JSON(parsed_body) }
     end
 
     it 'requests photos from the endpoint' do
@@ -27,7 +29,6 @@ describe PhotoAlbum do
     end
 
     context 'when request is successful' do
-      let(:response) { Net::HTTPSuccess.new('1.1', 200, 'OK') }
       let(:parsed_body) {
         [
           {"albumId"=>4, "id"=>151, "title"=>"possimus dolor minima provident ipsam",
@@ -39,10 +40,6 @@ describe PhotoAlbum do
         ]
       }
 
-      before do
-        allow(response).to receive(:body) { JSON(parsed_body) }
-      end
-
       it 'returns an array photo ids and titles' do
         expected = [
           '[151] possimus dolor minima provident ipsam',
@@ -52,14 +49,13 @@ describe PhotoAlbum do
 
         expect(photo_album.request_photos).to eq(expected)
       end
-
     end
 
     context 'when request is not succesful' do
       let(:response) { Net::HTTPServiceUnavailable.new('1.1', 503, 'Service Unavailable') }
 
-      it 'returns an error message' do
-        expect(photo_album.request_photos).to eq('Request failed with 503 Service Unavailable')
+      it 'raises an error' do
+        expect { photo_album.request_photos }.to raise_error(RuntimeError, 'Request failed with 503 Service Unavailable')
       end
     end
   end

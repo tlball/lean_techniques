@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require_relative './photo'
+require_relative './photo_album'
+
+photo_album = PhotoAlbum.new(ARGV[0])
+puts photo_album.print_photos

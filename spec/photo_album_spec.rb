@@ -13,4 +13,54 @@ describe PhotoAlbum do
       expect(photo_album.uri('foo').to_s).to eq("#{PhotoAlbum::ENDPOINT}?albumId=foo")
     end
   end
+
+  describe 'request_photos' do
+    let(:response) { instance_double(Net::HTTPOK, code: 200, message: 'OK') }
+
+    before do
+      allow(Net::HTTP).to receive(:get_response) { response }
+    end
+
+    it 'requests photos from the endpoint' do
+      expect(Net::HTTP).to receive(:get_response).with(URI(PhotoAlbum::ENDPOINT))
+      photo_album.request_photos
+    end
+
+    context 'when request is successful' do
+      let(:response) { Net::HTTPSuccess.new('1.1', 200, 'OK') }
+      let(:parsed_body) {
+        [
+          {"albumId"=>4, "id"=>151, "title"=>"possimus dolor minima provident ipsam",
+           "url"=>"https://via.placeholder.com/600/1d2ad4", "thumbnailUrl"=>"https://via.placeholder.com/150/1d2ad4"},
+          {"albumId"=>4, "id"=>152, "title"=>"et accusantium enim pariatur eum nihil fugit",
+           "url"=>"https://via.placeholder.com/600/a01c5b", "thumbnailUrl"=>"https://via.placeholder.com/150/a01c5b"},
+          {"albumId"=>4, "id"=>153, "title"=>"eum laborum in sunt ea",
+           "url"=>"https://via.placeholder.com/600/9da52c", "thumbnailUrl"=>"https://via.placeholder.com/150/9da52c"}
+        ]
+      }
+
+      before do
+        allow(response).to receive(:body) { JSON(parsed_body) }
+      end
+
+      it 'returns an array photo ids and titles' do
+        expected = [
+          '[151] possimus dolor minima provident ipsam',
+          '[152] et accusantium enim pariatur eum nihil fugit',
+          '[153] eum laborum in sunt ea'
+        ]
+
+        expect(photo_album.request_photos).to eq(expected)
+      end
+
+    end
+
+    context 'when request is not succesful' do
+      let(:response) { Net::HTTPServiceUnavailable.new('1.1', 503, 'Service Unavailable') }
+
+      it 'returns an error message' do
+        expect(photo_album.request_photos).to eq('Request failed with 503 Service Unavailable')
+      end
+    end
+  end
 end

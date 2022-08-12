@@ -6,24 +6,30 @@ require 'net/http'
 class PhotoAlbum
   ENDPOINT = 'https://jsonplaceholder.typicode.com/photos'
 
-  def request_photos(album_id = nil)
-    res = Net::HTTP.get_response(uri(album_id))
+  attr_accessor :id
+
+  def initialize(id = nil)
+    @id = id
+  end
+
+  def request_photos
+    res = Net::HTTP.get_response(uri)
     raise "Request failed with #{res.code} #{res.message}" unless res.is_a?(Net::HTTPSuccess)
 
     parse_body(res.body).map { |photo_data| Photo.new(photo_data) }
   end
 
-  def uri(album_id = nil)
+  def uri
     uri = URI(ENDPOINT)
-    if album_id
-      params = { albumId: album_id }
+    if id
+      params = { albumId: id }
       uri.query = URI.encode_www_form(params)
     end
     uri
   end
 
-  def print_photos(album_id = nil)
-    request_photos(album_id).map(&:to_s)
+  def print_photos
+    request_photos.map(&:to_s)
   end
 
   private

@@ -4,13 +4,16 @@ describe PhotoAlbum do
 
   let(:photo_album) { PhotoAlbum.new }
   describe 'uri' do
-    it 'returns the default uri when no album_id given' do
+    it 'returns the default uri when no album id is given' do
       expect(photo_album.uri.to_s).to eq(PhotoAlbum::ENDPOINT)
     end
 
-    it 'returns the uri with a proper query string using the given album_id' do
-      expect(photo_album.uri(3).to_s).to eq("#{PhotoAlbum::ENDPOINT}?albumId=3")
-      expect(photo_album.uri('foo').to_s).to eq("#{PhotoAlbum::ENDPOINT}?albumId=foo")
+    it 'returns the uri with a proper query string an album id exists' do
+      photo_album = PhotoAlbum.new(3)
+      expect(photo_album.uri.to_s).to eq("#{PhotoAlbum::ENDPOINT}?albumId=3")
+
+      photo_album = PhotoAlbum.new('foo')
+      expect(photo_album.uri.to_s).to eq("#{PhotoAlbum::ENDPOINT}?albumId=foo")
     end
   end
 

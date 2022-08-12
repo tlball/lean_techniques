@@ -82,14 +82,26 @@ describe PhotoAlbum do
       allow(response).to receive(:body) { JSON(parsed_body) }
     end
 
-    it 'outputs the photos as an array of ids and titles' do
-      expected = [
-        '[151] possimus dolor minima provident ipsam',
-        '[152] et accusantium enim pariatur eum nihil fugit',
-        '[153] eum laborum in sunt ea'
-      ]
+    context 'when photos are found' do
+      it 'outputs the photos as an array of ids and titles' do
+        expected = [
+          '[151] possimus dolor minima provident ipsam',
+          '[152] et accusantium enim pariatur eum nihil fugit',
+          '[153] eum laborum in sunt ea'
+        ]
 
-      expect(photo_album.print_photos).to eq(expected)
+        expect(photo_album.print_photos).to eq(expected)
+      end
+    end
+
+    context 'when no photos are found' do
+      let(:parsed_body) { [] }
+
+      it 'outputs a message stating no photos were found' do
+        photo_album.id = 3
+        expected = "No photos found for Album ID '3'"
+        expect(photo_album.print_photos).to eq(expected)
+      end
     end
   end
 end

@@ -29,7 +29,10 @@ class PhotoAlbum
   end
 
   def print_photos
-    request_photos.map(&:to_s)
+    photo_list = request_photos.map(&:to_s)
+    return "No photos found for Album ID '#{id}'" if photo_list.empty?
+
+    photo_list
   end
 
   private
